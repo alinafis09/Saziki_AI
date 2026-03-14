@@ -1,6 +1,32 @@
 {
-    "name": "TheMystic-Bot-MD",
-    "description": "Un chatbot automatizado para WhatsApp basado en Node.js, que permite realizar múltiples funciones y personalizaciones en la plataforma.",
-    "repository": "https://github.com/BrunoSobrino/TheMystic-Bot-MD",
-    "logo": "https://i.ibb.co/Qn1W6cP/image.png"
-  }
+    "name": "Saziki Bot",
+    "description": "A powerful multi-purpose WhatsApp bot built with Node.js, featuring AI integration, media downloading, sticker creation, group management, and economy system. Fully customizable and open-source.",
+    "repository": "https://github.com/alinafis09/Saziki_MD",
+    "logo": "https://i.ibb.co/CpbgcS6T/f77686685239916110a0dc4f1bbbc4ff.jpg",
+    "keywords": ["whatsapp-bot", "nodejs", "baileys", "ai", "chatbot", "sticker-maker", "youtube-downloader", "group-manager"],
+    "env": {
+        "BOT_NAME": {
+            "description": "Name of your bot",
+            "value": "Saziki Bot"
+        },
+        "OWNER_NUMBER": {
+            "description": "Your WhatsApp number with country code (without +)",
+            "value": "212719558797"
+        },
+        "PREFIX": {
+            "description": "Command prefix for the bot",
+            "value": "."
+        }
+    },
+    "buildpacks": [
+        {
+            "url": "heroku/nodejs"
+        },
+        {
+            "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+        },
+        {
+            "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
+        }
+    ]
+}
