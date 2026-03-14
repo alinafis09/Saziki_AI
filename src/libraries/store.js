@@ -1,11 +1,13 @@
-import { 
+import pkg from '@whiskeysockets/baileys';
+const { 
     proto, 
     isJidBroadcast, 
     WAMessageStubType, 
     updateMessageWithReceipt, 
     updateMessageWithReaction, 
     jidNormalizedUser 
-} from '@whiskeysockets/baileys';
+} = pkg;
+
 const TIME_TO_DATA_STALE = 5 * 60 * 1000;
 
 function makeInMemoryStore() {
