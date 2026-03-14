@@ -12,6 +12,7 @@ import store from "./store.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+import baileys from '@whiskeysockets/baileys';
 const {
     default: _makeWaSocket,
     makeWALegacySocket,
@@ -27,7 +28,7 @@ const {
     getAggregateVotesInPollMessage,
     prepareWAMessageMedia,
     WA_DEFAULT_EPHEMERAL,
-} = await import("@whiskeysockets/baileys");
+} = baileys;
 
 export function makeWASocket(connectionOptions, options = {}) {
     const conn = (global.opts["legacy"] ? makeWALegacySocket : _makeWaSocket)(
