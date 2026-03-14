@@ -1,0 +1,55 @@
+{
+  "261125656551615": {
+    "jid": "261125656551615@s.whatsapp.net",
+    "lid": "261125656551615@lid",
+    "name": "261125656551615",
+    "timestamp": 1773005285400,
+    "phoneDetected": true,
+    "phoneNumber": "261125656551615"
+  },
+  "257329224269987": {
+    "jid": "257329224269987@s.whatsapp.net",
+    "lid": "257329224269987@lid",
+    "name": "257329224269987",
+    "timestamp": 1772561864037,
+    "phoneDetected": true,
+    "phoneNumber": "257329224269987"
+  },
+  "139002975912042": {
+    "jid": "212695302063@s.whatsapp.net",
+    "lid": "139002975912042@lid",
+    "name": "212695302063",
+    "timestamp": 1772298307571
+  },
+  "137117518819382": {
+    "jid": "212710251670@s.whatsapp.net",
+    "lid": "137117518819382@lid",
+    "name": "212710251670",
+    "timestamp": 1772298312105
+  },
+  "49766440386748": {
+    "jid": "49766440386748@s.whatsapp.net",
+    "lid": "49766440386748@lid",
+    "name": "49766440386748",
+    "timestamp": 1772409813936,
+    "phoneDetected": true,
+    "country": "Alemania",
+    "phoneNumber": "49766440386748"
+  },
+  "212710251670": {
+    "jid": "212710251670@s.whatsapp.net",
+    "lid": "212710251670@lid",
+    "name": "212710251670",
+    "timestamp": 1773019195935,
+    "phoneDetected": true,
+    "phoneNumber": "212710251670"
+  },
+  "212710251670200": {
+    "jid": "212710251670200@s.whatsapp.net",
+    "lid": "212710251670200@lid",
+    "name": "212710251670200",
+    "timestamp": 1772561080236,
+    "phoneDetected": true,
+    "phoneNumber": "212710251670200"
+  }
+}

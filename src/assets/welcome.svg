@@ -1,0 +1,19 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="url(#gradient)"/>
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <text x="400" y="150" text-anchor="middle" fill="white" font-size="48" font-family="Arial" font-weight="bold">WELCOME</text>
+  <text x="400" y="220" text-anchor="middle" fill="white" font-size="24" font-family="Arial" id="name">Name</text>
+  <text x="400" y="270" text-anchor="middle" fill="white" font-size="18" font-family="Arial" id="group">Group</text>
+  <text x="400" y="320" text-anchor="middle" fill="white" font-size="14" font-family="Arial" id="text">Welcome Text</text>
+  <g transform="translate(50,50)" id="profile">
+    <circle cx="50" cy="50" r="40" fill="white"/>
+  </g>
+  <g transform="translate(700,50)" id="barcode">
+    <rect width="100" height="40" fill="white"/>
+  </g>
+</svg>

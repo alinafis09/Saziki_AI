@@ -1,0 +1,42 @@
+{
+  "users": {
+    "212710251670@s.whatsapp.net": {
+      "totalReceived": 55,
+      "lastUpdate": "2026-03-07T20:01:32.274Z",
+      "history": [
+        {
+          "timestamp": "2026-03-07T19:56:20.095Z",
+          "oldLimit": 20,
+          "newLimit": 20,
+          "change": 0
+        },
+        {
+          "timestamp": "2026-03-07T20:01:32.274Z",
+          "oldLimit": 20,
+          "newLimit": 75,
+          "change": 55
+        }
+      ]
+    }
+  },
+  "transactions": [
+    {
+      "id": "tx_1772913380097_rjuiiqphr",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@lid",
+      "amount": 0,
+      "reason": "manual",
+      "timestamp": "2026-03-07T19:56:20.097Z",
+      "date": "٧‏/٣‏/٢٠٢٦، ٧:٥٦:٢٠ م"
+    },
+    {
+      "id": "tx_1772913692275_r90dv5tza",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@lid",
+      "amount": 55,
+      "reason": "manual",
+      "timestamp": "2026-03-07T20:01:32.275Z",
+      "date": "٧‏/٣‏/٢٠٢٦، ٨:٠١:٣٢ م"
+    }
+  ]
+}

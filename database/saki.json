@@ -1,0 +1,87 @@
+{
+  "users": {
+    "212710251670@s.whatsapp.net": {
+      "totalReceived": 625,
+      "lastUpdate": "2026-03-08T21:29:08.992Z",
+      "history": [
+        {
+          "timestamp": "2026-03-07T20:28:48.153Z",
+          "oldSaki": 0,
+          "newSaki": 15,
+          "change": 15
+        },
+        {
+          "timestamp": "2026-03-08T18:23:22.664Z",
+          "oldSaki": 15,
+          "newSaki": 515,
+          "change": 500
+        },
+        {
+          "timestamp": "2026-03-08T21:18:18.308Z",
+          "oldSaki": 35,
+          "newSaki": 85,
+          "change": 50
+        },
+        {
+          "timestamp": "2026-03-08T21:23:05.967Z",
+          "oldSaki": 85,
+          "newSaki": 135,
+          "change": 50
+        },
+        {
+          "timestamp": "2026-03-08T21:29:08.993Z",
+          "oldSaki": 135,
+          "newSaki": 145,
+          "change": 10
+        }
+      ]
+    }
+  },
+  "transactions": [
+    {
+      "id": "saki_1772915328223_46zqu71qc",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@lid",
+      "amount": 15,
+      "reason": "manual",
+      "timestamp": "2026-03-07T20:28:48.223Z",
+      "date": "٧‏/٣‏/٢٠٢٦، ٨:٢٨:٤٨ م"
+    },
+    {
+      "id": "saki_1772994202668_m8zr6cwip",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@s.whatsapp.net",
+      "amount": 500,
+      "reason": "manual",
+      "timestamp": "2026-03-08T18:23:22.668Z",
+      "date": "٨‏/٣‏/٢٠٢٦، ٦:٢٣:٢٢ م"
+    },
+    {
+      "id": "saki_1773004698310_8xt22mllu",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@lid",
+      "amount": 50,
+      "reason": "manual",
+      "timestamp": "2026-03-08T21:18:18.310Z",
+      "date": "٨‏/٣‏/٢٠٢٦، ٩:١٨:١٨ م"
+    },
+    {
+      "id": "saki_1773004985969_2wzomq4zv",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@s.whatsapp.net",
+      "amount": 50,
+      "reason": "manual",
+      "timestamp": "2026-03-08T21:23:05.969Z",
+      "date": "٨‏/٣‏/٢٠٢٦، ٩:٢٣:٠٥ م"
+    },
+    {
+      "id": "saki_1773005348994_mi42qrfab",
+      "userId": "212710251670@s.whatsapp.net",
+      "adminId": "261125656551615@lid",
+      "amount": 10,
+      "reason": "manual",
+      "timestamp": "2026-03-08T21:29:08.994Z",
+      "date": "٨‏/٣‏/٢٠٢٦، ٩:٢٩:٠٨ م"
+    }
+  ]
+}

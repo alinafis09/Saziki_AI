@@ -1,0 +1,64 @@
+{
+  "users": {
+    "261125656551615@lid": {
+      "xp": 0,
+      "level": 1,
+      "coins": 100,
+      "bank": 0,
+      "lastDaily": 0,
+      "lastMessage": 0,
+      "totalMessages": 0,
+      "joinedAt": 1772392681910
+    },
+    "49766440386748@lid": {
+      "xp": 0,
+      "level": 1,
+      "coins": 100,
+      "bank": 0,
+      "lastDaily": 0,
+      "lastMessage": 0,
+      "totalMessages": 0,
+      "joinedAt": 1772392763086
+    },
+    "49766440386748@s.whatsapp.net": {
+      "xp": 0,
+      "level": 1,
+      "coins": 100,
+      "bank": 0,
+      "lastDaily": 0,
+      "lastMessage": 0,
+      "totalMessages": 0,
+      "joinedAt": 1772409777389
+    },
+    "257329224269987@s.whatsapp.net": {
+      "xp": 0,
+      "level": 1,
+      "coins": 100,
+      "bank": 0,
+      "lastDaily": 0,
+      "lastMessage": 0,
+      "totalMessages": 0,
+      "joinedAt": 1772463710781
+    },
+    "261125656551615@s.whatsapp.net": {
+      "xp": 47,
+      "level": 1,
+      "coins": 115,
+      "bank": 0,
+      "lastDaily": 0,
+      "lastMessage": 1772561241509,
+      "totalMessages": 3,
+      "joinedAt": 1772561115571
+    },
+    "212710251670@s.whatsapp.net": {
+      "xp": 0,
+      "level": 1,
+      "coins": 100,
+      "bank": 0,
+      "lastDaily": 0,
+      "lastMessage": 0,
+      "totalMessages": 0,
+      "joinedAt": 1772561684489
+    }
+  }
+}
