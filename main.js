@@ -2,6 +2,13 @@
 // Saziki Smart Bot - AI-Powered WhatsApp Bot
 
 import './config.js';
+import crypto from 'crypto';
+
+// Fix for crypto in Node.js environment
+if (!globalThis.crypto) {
+    globalThis.crypto = crypto;
+}
+
 import {
     makeWASocket,
     useMultiFileAuthState,
