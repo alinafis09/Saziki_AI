@@ -1,11 +1,10 @@
-// main.js - مع QR Code مصغر لـ Railway
+// main.js - مع Pairing Code بطريقة مضمونة
 // Saziki Smart Bot - AI-Powered WhatsApp Bot
 
 import './config.js';
 import crypto from 'crypto';
-import QRCode from 'qrcode';
 
-// Fix for crypto in Node.js environment
+// Fix for crypto
 if (!globalThis.crypto) {
     globalThis.crypto = {
         getRandomValues: (arr) => crypto.randomBytes(arr.length),
@@ -19,7 +18,8 @@ import {
     useMultiFileAuthState,
     DisconnectReason,
     fetchLatestBaileysVersion,
-    makeCacheableSignalKeyStore
+    makeCacheableSignalKeyStore,
+    Browsers
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import P from 'pino';
@@ -27,7 +27,16 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
+import Spinnies from 'spinnies';
+import readline from 'readline';
 import { handleAIMessage } from './ai_handler.js';
+
+const spinnies = new Spinnies();
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+const question = (text) => new Promise((resolve) => rl.question(text, resolve));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SESSION_DIR = path.join(__dirname, global.authFile || 'SazikiSession');
@@ -41,7 +50,7 @@ if (!phoneNumber) {
 }
 
 phoneNumber = phoneNumber.replace(/[^0-9]/g, '');
-console.log(chalk.cyan(`📱 Bot configured for number: ${phoneNumber}`));
+console.log(chalk.cyan(`📱 Bot will use number: ${phoneNumber}`));
 
 // Ensure session directory exists
 if (!fs.existsSync(SESSION_DIR)) {
@@ -53,77 +62,108 @@ let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 10;
 const RECONNECT_DELAY = 10000;
 
-// ==================== دالة عرض QR Code مصغر ====================
-async function displayCompactQR(qrString) {
-    try {
-        // إنشاء QR Code بحجم صغير جداً
-        const qrCode = await QRCode.toString(qrString, {
-            type: 'terminal',
-            small: true, // ✅ حجم صغير
-            errorCorrectionLevel: 'L' // مستوى تصحيح أخطاء منخفض لتقليل الحجم
-        });
-        
-        console.clear();
-        console.log(chalk.yellow.bold('\n╔════════════════════════════════════════════════════════╗'));
-        console.log(chalk.yellow.bold('║              📱 SCAN THIS QR CODE                      ║'));
-        console.log(chalk.yellow.bold('╚════════════════════════════════════════════════════════╝\n'));
-        
-        // عرض QR Code المصغر
-        console.log(qrCode);
-        
-        console.log(chalk.cyan('\n📌 Instructions:'));
-        console.log(chalk.white('  1. Open WhatsApp > Settings > Linked Devices'));
-        console.log(chalk.white('  2. Tap "Link a Device"'));
-        console.log(chalk.white('  3. Scan the QR code above'));
-        console.log(chalk.gray('\n⏳ Waiting for scan... (60 seconds)\n'));
-        
-        // ✅ بديل: رابط مباشر للمسح (إذا كان QR لا يظهر جيداً)
-        const encodedQR = encodeURIComponent(qrString);
-        console.log(chalk.gray(`🔗 Or visit: https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedQR}`));
-        console.log(chalk.gray(`   (Open this link on your phone browser to see the QR)\n`));
-        
-    } catch (error) {
-        console.error(chalk.red('Error generating QR:'), error);
-    }
-}
-
 // ==================== CREATE SOCKET ====================
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
     const { version } = await fetchLatestBaileysVersion();
     
-    sock = makeWASocket({
+    // ✅ نفس إعدادات الكود الناجح
+    const connectionOptions = {
+        pairingCode: true, // ✅ مهم جداً لتفعيل Pairing Code
+        patchMessageBeforeSending: (message) => {
+            const requiresPatch = !!(message.interactiveResponse || message.buttonsMessage || message.templateMessage || message.listMessage);
+            if (requiresPatch) {
+                message = {
+                    viewOnceMessage: {
+                        message: {
+                            messageContextInfo: {
+                                deviceListMetadataVersion: 2,
+                                deviceListMetadata: {}
+                            },
+                            ...message
+                        }
+                    }
+                };
+            }
+            return message;
+        },
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' }))
         },
         printQRInTerminal: false,
         logger: P({ level: 'silent' }),
-        browser: ['Saziki Bot', 'Chrome', '1.0.0'],
-        defaultQueryTimeoutMs: 60000,
-        keepAliveIntervalMs: 60000,
+        browser: ['Linux', 'Chrome', ''],
+        version: [2, 3000, 1033105955], // ✅ نفس الإصدار المستخدم في الكود الناجح
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 0,
+        keepAliveIntervalMs: 10000,
+        emitOwnEvents: true,
+        fireInitQueries: true,
         generateHighQualityLinkPreview: false,
-        markOnlineOnConnect: true,
-        version
-    });
+        syncFullHistory: false,
+        markOnlineOnConnect: true
+    };
     
-    // ==================== CONNECTION HANDLER WITH COMPACT QR ====================
-    sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
-        // ✅ عرض QR Code مصغر
-        if (qr) {
-            await displayCompactQR(qr);
-        }
+    sock = makeWASocket(connectionOptions);
+    
+    // ==================== PAIRING CODE - نفس الطريقة الناجحة ====================
+    if (!sock.authState.creds.registered) {
+        console.log(chalk.yellow('\n🔐 Generating Pairing Code...\n'));
         
+        spinnies.add('pairing', { 
+            text: `Requesting code for: ${phoneNumber}`, 
+            color: "blue"
+        });
+        
+        setTimeout(async () => {
+            try {
+                let code = await sock.requestPairingCode(phoneNumber);
+                code = code?.match(/.{1,4}/g)?.join("-") || code;
+                
+                spinnies.succeed('pairing', { 
+                    text: `Your Pairing Code is ready!`, 
+                    successColor: "green"
+                });
+                
+                console.log(chalk.green.bold(`
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║              🔐 YOUR PAIRING CODE IS READY                   ║
+║                                                              ║
+║                    ${chalk.yellow.bold(code)}                   
+║                                                              ║
+║   📱 Steps to connect:                                       ║
+║   1. Open WhatsApp on your phone                            ║
+║   2. Go to Settings > Linked Devices                        ║
+║   3. Tap "Link a Device"                                    ║
+║   4. Enter the code shown above                             ║
+║                                                              ║
+║   ⏱️  Code expires in 60 seconds                            ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+`));
+            } catch (error) {
+                spinnies.fail('pairing', { 
+                    text: `Failed to get pairing code: ${error.message}`, 
+                    failColor: "red"
+                });
+                console.log(chalk.red('\n❌ Error getting pairing code.'));
+                console.log(chalk.yellow('💡 Make sure your number is valid and has WhatsApp installed.\n'));
+                process.exit(1);
+            }
+        }, 3000);
+    }
+    
+    // ==================== CONNECTION HANDLER ====================
+    sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
         if (connection === 'open') {
             reconnectAttempts = 0;
-            console.clear();
-            console.log(chalk.green.bold('\n╔════════════════════════════════════════════════════════╗'));
-            console.log(chalk.green.bold('║          ✅ BOT CONNECTED SUCCESSFULLY                 ║'));
-            console.log(chalk.green.bold('╚════════════════════════════════════════════════════════╝\n'));
+            console.log(chalk.green('\n✅ Smart Bot Connected Successfully!'));
             console.log(chalk.cyan(`📱 Bot JID: ${sock.user.id}`));
-            console.log(chalk.cyan(`📞 Number: ${sock.user.id.split(':')[0]}`));
-            console.log(chalk.yellow('\n🤖 Bot is online and responding to messages!\n'));
+            console.log(chalk.yellow('\n🤖 Bot is now online and ready!'));
+            console.log(chalk.white('📝 It will automatically respond to all private messages\n'));
         }
         
         if (connection === 'close') {
@@ -132,15 +172,12 @@ async function startBot() {
             
             if (shouldReconnect && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                 reconnectAttempts++;
-                console.log(chalk.yellow(`\n🔄 Reconnecting... (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`));
+                console.log(chalk.yellow(`🔄 Reconnecting... (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`));
                 setTimeout(startBot, RECONNECT_DELAY);
             } else if (statusCode === DisconnectReason.loggedOut) {
-                console.log(chalk.red('\n❌ Bot logged out. Delete session folder and restart.'));
-                console.log(chalk.gray(`   Session: ${SESSION_DIR}`));
-                process.exit(1);
+                console.log(chalk.red('❌ Bot logged out. Please delete session folder and restart.'));
             } else {
-                console.log(chalk.red('\n❌ Connection failed. Restarting...'));
-                process.exit(1);
+                console.log(chalk.red('❌ Max reconnection attempts reached.'));
             }
         }
     });
@@ -157,9 +194,11 @@ async function startBot() {
         const isGroup = sender.endsWith('@g.us');
         const isFromMe = msg.key.fromMe;
         
+        // Only respond to private messages
         if (isGroup) return;
         if (isFromMe) return;
         
+        // Extract message text and type
         let messageText = null;
         let messageType = null;
         
@@ -191,33 +230,37 @@ async function startBot() {
 
 // ==================== START BOT ====================
 
-console.clear();
-console.log(chalk.magenta.bold(`
-╔════════════════════════════════════════════════════════╗
-║                                                        ║
-║           🤖 𝗦𝗔𝗭𝗜𝗞𝗜 𝗦𝗠𝗔𝗥𝗧 𝗕𝗢𝗧                    ║
-║           🧠 NVIDIA Kimi-K2.5 AI                      ║
-║           📱 Auto-Reply | Vision AI                   ║
-║                                                        ║
-╚════════════════════════════════════════════════════════╝
+console.log(chalk.magenta(`
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║   🤖 𝗦𝗔𝗭𝗜𝗞𝗜 𝗦𝗠𝗔𝗥𝗧 𝗕𝗢𝗧
+║   🧠 Powered by NVIDIA Kimi-K2.5 AI
+║   📱 Zero-Command | Auto-Reply | Vision Capable
+║                                                                   ║
+║   📝 The bot will automatically respond to all private messages   ║
+║   🖼️ Supports images and text                                    ║
+║   🌐 Multi-language (Arabic, English, French, etc.)              ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
 `));
 
-console.log(chalk.gray('Starting bot...\n'));
-
-startBot().catch(error => {
-    console.error(chalk.red('\n❌ Fatal error:'), error);
-    process.exit(1);
-});
+startBot().catch(console.error);
 
 // ==================== GRACEFUL SHUTDOWN ====================
 process.on('SIGINT', async () => {
     console.log(chalk.yellow('\n🛑 Shutting down...'));
-    if (sock) await sock.logout();
+    if (sock) {
+        await sock.logout();
+        sock.end();
+    }
     process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
     console.log(chalk.yellow('\n🛑 Shutting down...'));
-    if (sock) await sock.logout();
+    if (sock) {
+        await sock.logout();
+        sock.end();
+    }
     process.exit(0);
 });
