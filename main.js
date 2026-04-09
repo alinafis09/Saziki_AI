@@ -2,12 +2,12 @@
 // Saziki Smart Bot - AI-Powered WhatsApp Bot
 
 import './config.js';
-import makeWASocket, {
+import {
+    makeWASocket,
     useMultiFileAuthState,
     DisconnectReason,
     fetchLatestBaileysVersion,
-    makeCacheableSignalKeyStore,
-    jidNormalizedUser
+    makeCacheableSignalKeyStore
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import P from 'pino';
