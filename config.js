@@ -3,7 +3,7 @@
 
 // رقم الهاتف الذي سيعمل عليه البوت (بدون +)
 // مثال: 212656551615
-global.botnumber = '212710251670';
+global.botnumber = '212624052666';
 
 // مسار حفظ الجلسة
 global.authFile = 'SazikiSession';
