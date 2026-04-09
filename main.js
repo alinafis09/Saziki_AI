@@ -1,6 +1,4 @@
-// main.js
-// Saziki Smart Bot - AI-Powered WhatsApp Bot
-
+// main.js - تعديل قسم الاقتران
 import './config.js';
 import crypto from 'crypto';
 
@@ -22,6 +20,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
+import QRCode from 'qrcode-terminal'; // ✅ أضف هذه الحزمة
 import { handleAIMessage } from './ai_handler.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -59,7 +58,7 @@ async function startBot() {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' }).child({ level: 'silent' }))
         },
-        printQRInTerminal: false,
+        printQRInTerminal: true, // ✅ تغيير إلى true
         logger: P({ level: 'info' }),
         browser: ['Ubuntu', 'Chrome', '20.0.04'],
         defaultQueryTimeoutMs: 60000,
@@ -70,7 +69,17 @@ async function startBot() {
     });
     
     // ==================== CONNECTION HANDLER ====================
-    sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
+    sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
+        // ✅ عرض QR Code
+        if (qr) {
+            console.log(chalk.yellow('\n📱 Scan this QR Code with WhatsApp:'));
+            QRCode.generate(qr, { small: true });
+            console.log(chalk.cyan('\n1. Open WhatsApp on your phone'));
+            console.log(chalk.cyan('2. Go to Settings > Linked Devices'));
+            console.log(chalk.cyan('3. Tap "Link a Device"'));
+            console.log(chalk.cyan('4. Scan the QR Code above\n'));
+        }
+        
         if (connection === 'open') {
             reconnectAttempts = 0;
             console.log(chalk.green('\n✅ Smart Bot Connected Successfully!'));
@@ -98,29 +107,7 @@ async function startBot() {
     // ==================== CREDENTIALS HANDLER ====================
     sock.ev.on('creds.update', saveCreds);
     
-    // ==================== PAIRING CODE ====================
-    if (!sock.authState.creds.registered) {
-        setTimeout(async () => {
-            try {
-                let code = await sock.requestPairingCode(phoneNumber);
-                code = code?.match(/.{1,4}/g)?.join('-') || code;
-                console.log(chalk.green(`
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║   🔐 PAIRING CODE: ${code}                    
-║                                                              ║
-║   Enter this code in WhatsApp > Linked Devices              ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-`));
-            } catch (error) {
-                console.error(chalk.red('Failed to get pairing code:'), error.message);
-                process.exit(1);
-            }
-        }, 3000);
-    }
-    
-    // ==================== MESSAGE HANDLER (NO COMMANDS NEEDED) ====================
+    // ==================== MESSAGE HANDLER ====================
     sock.ev.on('messages.upsert', async ({ messages }) => {
         const msg = messages[0];
         if (!msg.message) return;
@@ -129,11 +116,9 @@ async function startBot() {
         const isGroup = sender.endsWith('@g.us');
         const isFromMe = msg.key.fromMe;
         
-        // Only respond to private messages (not groups)
         if (isGroup) return;
         if (isFromMe) return;
         
-        // Extract message text and type
         let messageText = null;
         let messageType = null;
         
@@ -150,16 +135,12 @@ async function startBot() {
             messageText = msg.message.imageMessage.caption || null;
         }
         
-        // If it's a valid message (text or image), process with AI
         if (messageType === 'text' || messageType === 'image') {
             console.log(chalk.cyan(`\n📩 Message from: ${sender.split('@')[0]}`));
             console.log(chalk.white(`   Type: ${messageType}`));
             if (messageText) console.log(chalk.white(`   Text: ${messageText.substring(0, 100)}`));
             
-            // Show typing indicator
             await sock.sendPresenceUpdate('composing', sender);
-            
-            // Process with AI
             await handleAIMessage(sock, msg, sender, messageText, messageType);
         }
     });
