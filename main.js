@@ -1,10 +1,16 @@
-// main.js - تعديل قسم الاقتران
+// main.js
+// Saziki Smart Bot - AI-Powered WhatsApp Bot
+
 import './config.js';
 import crypto from 'crypto';
 
 // Fix for crypto in Node.js environment
 if (!globalThis.crypto) {
-    globalThis.crypto = crypto;
+    globalThis.crypto = {
+        getRandomValues: (arr) => crypto.randomBytes(arr.length),
+        subtle: crypto.subtle,
+        randomUUID: crypto.randomUUID
+    };
 }
 
 import {
@@ -12,7 +18,8 @@ import {
     useMultiFileAuthState,
     DisconnectReason,
     fetchLatestBaileysVersion,
-    makeCacheableSignalKeyStore
+    makeCacheableSignalKeyStore,
+    Browsers
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import P from 'pino';
@@ -20,7 +27,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
-import QRCode from 'qrcode-terminal'; // ✅ أضف هذه الحزمة
 import { handleAIMessage } from './ai_handler.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -56,30 +62,22 @@ async function startBot() {
     sock = makeWASocket({
         auth: {
             creds: state.creds,
-            keys: makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' }).child({ level: 'silent' }))
+            keys: makeCacheableSignalKeyStore(state.keys, P({ level: 'silent' }))
         },
-        printQRInTerminal: true, // ✅ تغيير إلى true
-        logger: P({ level: 'info' }),
-        browser: ['Ubuntu', 'Chrome', '20.0.04'],
+        printQRInTerminal: false,
+        logger: P({ level: 'silent' }),
+        browser: Browsers.ubuntu('Chrome'),
         defaultQueryTimeoutMs: 60000,
         keepAliveIntervalMs: 60000,
         generateHighQualityLinkPreview: false,
         markOnlineOnConnect: true,
-        version
+        version,
+        syncFullHistory: false,
+        mobile: true // ✅ مهم لتفعيل Pairing Code
     });
     
     // ==================== CONNECTION HANDLER ====================
-    sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
-        // ✅ عرض QR Code
-        if (qr) {
-            console.log(chalk.yellow('\n📱 Scan this QR Code with WhatsApp:'));
-            QRCode.generate(qr, { small: true });
-            console.log(chalk.cyan('\n1. Open WhatsApp on your phone'));
-            console.log(chalk.cyan('2. Go to Settings > Linked Devices'));
-            console.log(chalk.cyan('3. Tap "Link a Device"'));
-            console.log(chalk.cyan('4. Scan the QR Code above\n'));
-        }
-        
+    sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
         if (connection === 'open') {
             reconnectAttempts = 0;
             console.log(chalk.green('\n✅ Smart Bot Connected Successfully!'));
@@ -98,14 +96,80 @@ async function startBot() {
                 setTimeout(startBot, RECONNECT_DELAY);
             } else if (statusCode === DisconnectReason.loggedOut) {
                 console.log(chalk.red('❌ Bot logged out. Please delete session folder and restart.'));
+                process.exit(1);
             } else {
                 console.log(chalk.red('❌ Max reconnection attempts reached.'));
+                process.exit(1);
             }
         }
     });
     
     // ==================== CREDENTIALS HANDLER ====================
     sock.ev.on('creds.update', saveCreds);
+    
+    // ==================== PAIRING CODE - FIXED VERSION ====================
+    if (!sock.authState.creds.registered) {
+        setTimeout(async () => {
+            try {
+                console.log(chalk.yellow('\n🔄 Requesting pairing code...'));
+                
+                // ✅ الطريقة الصحيحة لطلب Pairing Code
+                const code = await sock.requestPairingCode(phoneNumber);
+                
+                // تنسيق الكود ليكون سهل القراءة
+                const formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
+                
+                console.log(chalk.green.bold(`
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║              🔐 YOUR PAIRING CODE IS READY                   ║
+║                                                              ║
+║                    ${chalk.yellow.bold(formattedCode)}                   
+║                                                              ║
+║   📱 Steps to connect:                                       ║
+║   1. Open WhatsApp on your phone                            ║
+║   2. Go to Settings > Linked Devices                        ║
+║   3. Tap "Link a Device"                                    ║
+║   4. Enter this code manually                               ║
+║                                                              ║
+║   ⏱️  Code expires in 60 seconds                            ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+`));
+            } catch (error) {
+                console.error(chalk.red('\n❌ Failed to get pairing code:'));
+                console.error(chalk.red(`   Error: ${error.message}`));
+                console.log(chalk.yellow('\n💡 Troubleshooting tips:'));
+                console.log(chalk.white('   1. Make sure the phone number format is correct'));
+                console.log(chalk.white('   2. Delete the session folder and try again'));
+                console.log(chalk.white('   3. Check if the bot number is registered on WhatsApp\n'));
+                
+                // إعادة المحاولة مرة واحدة فقط
+                try {
+                    console.log(chalk.yellow('🔄 Retrying once...'));
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    const retryCode = await sock.requestPairingCode(phoneNumber);
+                    const formattedRetryCode = retryCode?.match(/.{1,4}/g)?.join('-') || retryCode;
+                    
+                    console.log(chalk.green.bold(`
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║              🔐 YOUR PAIRING CODE IS READY                   ║
+║                                                              ║
+║                    ${chalk.yellow.bold(formattedRetryCode)}                   
+║                                                              ║
+║   📱 Enter this code in WhatsApp > Linked Devices           ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+`));
+                } catch (retryError) {
+                    console.error(chalk.red('❌ Pairing code failed. Please check your phone number and internet connection.'));
+                    console.error(chalk.yellow('💡 Alternative: Use QR code by setting printQRInTerminal: true'));
+                    process.exit(1);
+                }
+            }
+        }, 2000);
+    }
     
     // ==================== MESSAGE HANDLER ====================
     sock.ev.on('messages.upsert', async ({ messages }) => {
@@ -164,7 +228,10 @@ console.log(chalk.magenta(`
 ╚═══════════════════════════════════════════════════════════════════╝
 `));
 
-startBot().catch(console.error);
+startBot().catch(error => {
+    console.error(chalk.red('Fatal error:'), error);
+    process.exit(1);
+});
 
 // ==================== GRACEFUL SHUTDOWN ====================
 process.on('SIGINT', async () => {
