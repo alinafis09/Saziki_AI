@@ -17,6 +17,7 @@
     "qrcode": "*",
     "crypto": "^1.0.1",
     "openai": "*",
+    "cheerio": "*",
     "chalk": "^5.3.0",
     "pino": "^8.17.2"
   },
